@@ -1,13 +1,9 @@
-#!/usr/bin/python
-
 # CQCRatings.py uses the CQC API to access the CQC overall and key question ratings for providers
 # specified in CQCproviders.csv. The data is written to CQCdataOutput.csv
 
 # Example URL: https://api.cqc.org.uk/public/v1/providers/RL4?partnerCode=ADVISORYBOARD
 
-import csv
-import requests
-import json
+import csv, requests, json
 
 # Variables
 url='https://api.cqc.org.uk/public/v1/providers/'
@@ -16,9 +12,11 @@ resultFile = 'CQCdataOutput.csv'
 delim = '; '
 partnerCode = '?partnerCode=ADVISORYBOARD' # Requested by OGL 
 
+print('Running...')
+
 # Open the output file the data will be written to
-outfile = open(resultFile, 'w')
-writer = csv.writer(outfile)
+outfile = open(resultFile, 'w', newline='')
+writer = csv.writer(outfile, delimiter=';')
 
 # Write headers to the file
 writer.writerow(['CQC ID' + delim + 'Provider' + delim + 'Website' + delim + 'Rating Date' + delim + 'Overall Rating' 
@@ -27,8 +25,8 @@ writer.writerow(['CQC ID' + delim + 'Provider' + delim + 'Website' + delim + 'Ra
 # Loop through each CQC provider and read in the JSON data from CQC. Then write to the output file
 for row in csv.reader(open(providerFile), delimiter=','):
     url2 = url + row[0] + partnerCode
-    r = requests.get(url2)
-    jdata = r.json()
+    r = requests.get(url2) # Get the JSON data from the URL
+    jdata = json.loads(r.text)
     writer.writerow([jdata['providerId'] + delim + jdata['name'] + delim + jdata['website'] + delim
 + jdata['currentRatings']['reportDate'] + delim + jdata['currentRatings']
 ['overall']['rating'] + delim + jdata['currentRatings']['overall']['keyQuestionRatings'][0]['rating']
